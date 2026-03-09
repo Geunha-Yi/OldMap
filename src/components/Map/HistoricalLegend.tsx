@@ -1,6 +1,6 @@
 "use client";
 
-import { getRegionsForYear } from "@/lib/historicalRegions";
+import { formatYear } from "@/lib/historicalBasemaps";
 
 interface HistoricalLegendProps {
   selectedYear: number;
@@ -9,36 +9,22 @@ interface HistoricalLegendProps {
 export default function HistoricalLegend({
   selectedYear,
 }: HistoricalLegendProps) {
-  const regions = getRegionsForYear(selectedYear);
-
-  if (regions.length === 0) {
-    return (
-      <div className="absolute bottom-4 left-4 rounded-lg border border-gray-200 bg-white/95 px-3 py-2 shadow-lg">
-        <p className="text-xs text-gray-500">
-          {selectedYear}년 해당 지역 정보가 없습니다.
-        </p>
-      </div>
-    );
-  }
-
   return (
     <div className="absolute bottom-4 left-4 rounded-lg border border-gray-200 bg-white/95 px-3 py-2 shadow-lg">
-      <p className="mb-2 text-xs font-medium text-gray-700">
-        {selectedYear}년 지역
+      <p className="text-xs font-medium text-gray-700">
+        {formatYear(selectedYear)} – 전 세계 역사적 국경
       </p>
-      <ul className="space-y-1">
-        {regions.map((r) => (
-          <li key={r.id} className="flex items-center gap-2 text-xs">
-            <span
-              className="h-3 w-3 shrink-0 rounded"
-              style={{ backgroundColor: r.color }}
-            />
-            <span>
-              {r.name} ({r.yearFrom}~{r.yearTo})
-            </span>
-          </li>
-        ))}
-      </ul>
+      <p className="mt-0.5 text-xs text-gray-500">
+        출처:{" "}
+        <a
+          href="https://github.com/aourednik/historical-basemaps"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-600 hover:underline"
+        >
+          historical-basemaps
+        </a>
+      </p>
     </div>
   );
 }

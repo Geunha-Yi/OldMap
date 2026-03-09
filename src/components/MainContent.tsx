@@ -10,7 +10,7 @@ const MapView = dynamic(() => import("@/components/Map/MapView"), {
 });
 
 export default function MainContent() {
-  const [selectedYear, setSelectedYear] = useState(1900);
+  const [selectedYear, setSelectedYear] = useState(1500);
 
   const handleYearChange = useCallback((year: number) => {
     setSelectedYear(year);
