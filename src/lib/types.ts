@@ -35,17 +35,17 @@ export interface MapLinks {
 
 /** 역사 지도 개별 아이템 (API 응답 구조) */
 export interface HistoricalMap {
-  "@id": string;
+  "@id"?: string;
   id: string;
-  attribution: string;
-  attribution_link: string;
-  name: string;
-  state: string;
+  attribution?: string;
+  attribution_link?: string;
+  name?: string;
+  state?: string;
   title: string;
-  tracking_id: string | null;
-  is_bookmarked: boolean;
-  links: MapLinks;
-  thumbnail: MapThumbnail;
+  tracking_id?: string | null;
+  is_bookmarked?: boolean;
+  links?: MapLinks;
+  thumbnail?: MapThumbnail;
 }
 
 /** Geosearch 검색 요청 파라미터 */
