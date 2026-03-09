@@ -53,8 +53,8 @@ export default function SearchPanel({
   };
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="mb-4 flex gap-2">
+    <div className="flex min-h-0 flex-1 flex-col p-4">
+      <div className="mb-3 shrink-0 flex gap-2">
         <input
           type="text"
           value={query}
@@ -72,9 +72,9 @@ export default function SearchPanel({
         </button>
       </div>
 
-      {error && <p className="mb-2 text-xs text-amber-600">{error}</p>}
+      {error && <p className="mb-2 shrink-0 text-xs text-amber-600">{error}</p>}
 
-      <div className="flex-1 overflow-y-auto">
+      <div className="min-h-0 flex-1 overflow-y-auto">
         {result?.maps && result.maps.length > 0 ? (
           <ul className="space-y-3">
             {result.maps.map((map) => (

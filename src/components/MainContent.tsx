@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import dynamic from "next/dynamic";
-import YearRangeSlider from "@/components/Timeline/YearRangeSlider";
+import YearBar from "@/components/Timeline/YearBar";
 import SearchPanel from "@/components/SearchPanel/SearchPanel";
 
 const MapView = dynamic(() => import("@/components/Map/MapView"), {
@@ -10,36 +10,31 @@ const MapView = dynamic(() => import("@/components/Map/MapView"), {
 });
 
 export default function MainContent() {
-  const [yearFrom, setYearFrom] = useState(1600);
-  const [yearTo, setYearTo] = useState(2000);
+  const [selectedYear, setSelectedYear] = useState(1900);
 
-  const handleYearChange = useCallback((min: number, max: number) => {
-    setYearFrom(min);
-    setYearTo(max);
+  const handleYearChange = useCallback((year: number) => {
+    setSelectedYear(year);
   }, []);
 
   return (
-    <div className="flex flex-1 flex-col lg:flex-row">
-      {/* 지도 영역 */}
-      <section className="relative flex-1 border-b border-gray-200 lg:border-b-0 lg:border-r">
-        <div className="h-[350px] w-full md:h-[450px] lg:h-full lg:min-h-[500px]">
-          <MapView />
-        </div>
-      </section>
+    <div className="flex min-h-0 flex-1 flex-col">
+      {/* 지도 + 검색 패널 행 */}
+      <div className="flex min-h-0 flex-1">
+        {/* 지도 영역 - 고정, 스크롤 없음 */}
+        <section className="relative min-w-0 flex-1 overflow-hidden">
+          <MapView selectedYear={selectedYear} />
+        </section>
 
-      {/* 오른쪽 패널: 타임라인 + 검색 */}
-      <aside className="flex w-full flex-col border-t border-gray-200 bg-gray-50 lg:w-96 lg:border-t-0">
-        <div className="border-b border-gray-200 bg-white p-4">
-          <h2 className="mb-3 text-lg font-semibold text-gray-800">타임라인</h2>
-          <YearRangeSlider onChange={handleYearChange} />
-        </div>
-        <div className="flex-1 overflow-hidden p-4">
-          <h2 className="mb-3 text-lg font-semibold text-gray-800">
-            역사 지도 검색
-          </h2>
-          <SearchPanel yearFrom={yearFrom} yearTo={yearTo} />
-        </div>
-      </aside>
+        {/* 검색 패널 - 고정 너비, 내부 리스트만 스크롤 */}
+        <aside className="flex w-80 shrink-0 flex-col overflow-hidden border-l border-gray-200 bg-white">
+          <SearchPanel yearFrom={selectedYear} yearTo={selectedYear} />
+        </aside>
+      </div>
+
+      {/* 하단 연도 바 - 전체 너비 */}
+      <div className="shrink-0 border-t border-gray-200 bg-white shadow-lg">
+        <YearBar selectedYear={selectedYear} onChange={handleYearChange} />
+      </div>
     </div>
   );
 }
