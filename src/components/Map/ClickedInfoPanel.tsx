@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { formatYear } from "@/lib/historicalBasemaps";
+import { formatYear } from "@/lib/cliopatria";
 import { fetchWikiSummary, type WikiSummary } from "@/lib/wikiApi";
 
 export interface ClickedRegionInfo {

@@ -1,6 +1,6 @@
 "use client";
 
-import { formatYear } from "@/lib/historicalBasemaps";
+import { formatYear } from "@/lib/cliopatria";
 import type { LegendRegion } from "@/lib/types";
 
 interface HistoricalLegendProps {

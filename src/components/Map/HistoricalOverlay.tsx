@@ -5,7 +5,7 @@ import { GeoJSON, Marker, useMap } from "react-leaflet";
 import L from "leaflet";
 import type { GeoJsonObject } from "geojson";
 import type { FeatureCollection } from "geojson";
-import { getGeoJsonUrlForYear } from "@/lib/historicalBasemaps";
+import { getCliopatriaForYear } from "@/lib/cliopatria";
 import { correctRegionName } from "@/lib/regionNameCorrections";
 import type { ClickedRegionInfo } from "./ClickedInfoPanel";
 import type { LegendRegion } from "@/lib/types";
@@ -69,12 +69,8 @@ export default function HistoricalOverlay({
     setError(null);
     setClickedPoint(null);
 
-    getGeoJsonUrlForYear(selectedYear)
-      .then(async ({ url, year }) => {
-        if (cancelled) return;
-        const res = await fetch(url);
-        if (!res.ok) throw new Error(`Failed to load: ${res.status}`);
-        const data: GeoJsonObject = await res.json();
+    getCliopatriaForYear(selectedYear)
+      .then(({ data, year }) => {
         if (cancelled) return;
         setGeojson(data);
         setDisplayYear(year);

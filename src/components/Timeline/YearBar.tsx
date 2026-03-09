@@ -1,6 +1,6 @@
 "use client";
 
-import { MIN_YEAR, MAX_YEAR, formatYear } from "@/lib/historicalBasemaps";
+import { MIN_YEAR, MAX_YEAR, formatYear } from "@/lib/cliopatria";
 
 interface YearBarProps {
   selectedYear: number;
