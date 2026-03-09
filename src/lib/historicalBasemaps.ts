@@ -63,6 +63,6 @@ export const MIN_YEAR = -5000; // BC 5000
 export const MAX_YEAR = 2023;
 
 export function formatYear(year: number): string {
-  if (year < 0) return `BC ${Math.abs(year)}`;
-  return `AD ${year}`;
+  if (year < 0) return `B.C. ${Math.abs(year)}`;
+  return `A.D. ${year}`;
 }
