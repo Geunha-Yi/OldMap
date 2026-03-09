@@ -1,18 +1,22 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { GeoJSON, useMap } from "react-leaflet";
+import { GeoJSON, Marker, useMap } from "react-leaflet";
 import L from "leaflet";
 import type { GeoJsonObject } from "geojson";
 import type { FeatureCollection } from "geojson";
 import { getGeoJsonUrlForYear, formatYear } from "@/lib/historicalBasemaps";
+import type { ClickedRegionInfo } from "./ClickedInfoPanel";
+import type { LegendRegion } from "@/lib/types";
 
 interface HistoricalOverlayProps {
   selectedYear: number;
+  onRegionClick?: (info: ClickedRegionInfo) => void;
+  onRegionsLoaded?: (regions: LegendRegion[]) => void;
 }
 
 /** 국가명으로 일관된 색상 생성 */
-function getColorForName(name: string): string {
+export function getColorForName(name: string): string {
   const colors = [
     "#3B82F6",
     "#10B981",
@@ -38,19 +42,31 @@ function getColorForName(name: string): string {
   return colors[Math.abs(hash) % colors.length];
 }
 
+const markerIcon = L.divIcon({
+  className: "custom-marker",
+  html: '<div style="width:12px;height:12px;border-radius:50%;background:#2563eb;border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,0.3)"></div>',
+  iconSize: [12, 12],
+  iconAnchor: [6, 6],
+});
+
 export default function HistoricalOverlay({
   selectedYear,
+  onRegionClick,
+  onRegionsLoaded,
 }: HistoricalOverlayProps) {
-  const map = useMap();
   const [geojson, setGeojson] = useState<GeoJsonObject | null>(null);
   const [displayYear, setDisplayYear] = useState<number>(selectedYear);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [clickedPoint, setClickedPoint] = useState<[number, number] | null>(
+    null
+  );
 
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
     setError(null);
+    setClickedPoint(null);
 
     getGeoJsonUrlForYear(selectedYear)
       .then(async ({ url, year }) => {
@@ -74,60 +90,59 @@ export default function HistoricalOverlay({
     };
   }, [selectedYear]);
 
+  // 연도 변경 시 지도 초기화하지 않음 (fitBounds 제거)
+
   useEffect(() => {
-    const fc = geojson as FeatureCollection | null;
-    if (fc?.features?.length) {
-      const allCoords: [number, number][] = [];
-      for (const f of fc.features) {
-        const geom = f.geometry;
-        if (geom?.type === "MultiPolygon") {
-          for (const ring of geom.coordinates) {
-            for (const coord of ring[0]) {
-              allCoords.push([coord[1], coord[0]]);
-            }
-          }
-        } else if (geom?.type === "Polygon") {
-          for (const coord of geom.coordinates[0]) {
-            allCoords.push([coord[1], coord[0]]);
-          }
+    if (geojson && onRegionsLoaded) {
+      const fc = geojson as FeatureCollection;
+      const seen = new Set<string>();
+      const regions: LegendRegion[] = [];
+      for (const f of fc.features ?? []) {
+        const name = (f.properties as { NAME?: string })?.NAME ?? "Unknown";
+        if (!seen.has(name)) {
+          seen.add(name);
+          regions.push({ name, color: getColorForName(name) });
         }
       }
-      if (allCoords.length > 0) {
-        const bounds = L.latLngBounds(allCoords);
-        map.fitBounds(bounds, { padding: [20, 20], maxZoom: 3 });
-      }
+      onRegionsLoaded(regions);
     }
-  }, [geojson, map]);
+  }, [geojson, onRegionsLoaded]);
 
   if (loading || error || !geojson) {
     return null;
   }
 
   return (
-    <GeoJSON
-      key={displayYear}
-      data={geojson}
-      style={(feature) => {
-        const name =
-          (feature?.properties as { NAME?: string })?.NAME ?? "Unknown";
-        const color = getColorForName(name);
-        return {
-          fillColor: color,
-          color: "#1f2937",
-          weight: 0.5,
-          fillOpacity: 0.5,
-        };
-      }}
-      onEachFeature={(feature, layer) => {
-        const props = feature.properties as { NAME?: string };
-        const name = props?.NAME ?? "Unknown";
-        layer.bindPopup(
-          `<div class="min-w-[160px]">
-            <p class="font-semibold text-gray-900">${name}</p>
-            <p class="text-sm text-gray-600">${formatYear(displayYear)}</p>
-          </div>`
-        );
-      }}
-    />
+    <>
+      <GeoJSON
+        key={displayYear}
+        data={geojson}
+        style={(feature) => {
+          const name =
+            (feature?.properties as { NAME?: string })?.NAME ?? "Unknown";
+          const color = getColorForName(name);
+          return {
+            fillColor: color,
+            color: "#1f2937",
+            weight: 0.5,
+            fillOpacity: 0.5,
+          };
+        }}
+        onEachFeature={(feature, layer) => {
+          layer.on("click", (e) => {
+            const name =
+              (feature.properties as { NAME?: string })?.NAME ?? "Unknown";
+            const latlng = e.latlng;
+            setClickedPoint([latlng.lat, latlng.lng]);
+            onRegionClick?.({
+              name,
+              year: displayYear,
+              latlng: [latlng.lat, latlng.lng],
+            });
+          });
+        }}
+      />
+      {clickedPoint && <Marker position={clickedPoint} icon={markerIcon} />}
+    </>
   );
 }

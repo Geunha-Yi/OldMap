@@ -8,4 +8,5 @@ export type {
   MapLinks,
   MapThumbnail,
   MapThumbnails,
+  LegendRegion,
 } from "./types";

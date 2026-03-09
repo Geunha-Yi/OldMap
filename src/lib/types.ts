@@ -50,36 +50,35 @@ export interface HistoricalMap {
 
 /** Geosearch 검색 요청 파라미터 */
 export interface GeoSearchParams {
-  /** 경계 상자: minLon, minLat, maxLon, maxLat (WGS84) */
   bbox?: {
     minLon: number;
     minLat: number;
     maxLon: number;
     maxLat: number;
   };
-  /** 전체 텍스트 검색 (제목, 저자 등) */
   fulltext?: string;
-  /** 결과 개수 제한 (기본: 10) */
   limit?: number;
-  /** 오프셋 (페이지네이션) */
   offset?: number;
-  /** 커서 기반 페이지네이션용 */
   cursor?: string;
-  /** 연도 범위 - 시작 */
   yearFrom?: number;
-  /** 연도 범위 - 종료 */
   yearTo?: number;
 }
 
-/** Geosearch API raw 응답 ( maps 엔드포인트 ) */
+/** Geosearch API raw 응답 */
 export interface GeoSearchApiResponse {
   "@list": HistoricalMap[];
   next?: string;
 }
 
-/** Geosearch 검색 결과 (정규화된 구조) */
+/** Geosearch 검색 결과 */
 export interface GeoSearchResult {
   maps: HistoricalMap[];
   nextCursor?: string | null;
   hasMore: boolean;
+}
+
+/** 범례용 지역 (이름, 색상) */
+export interface LegendRegion {
+  name: string;
+  color: string;
 }
