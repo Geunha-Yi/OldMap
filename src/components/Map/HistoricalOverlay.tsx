@@ -5,7 +5,8 @@ import { GeoJSON, Marker, useMap } from "react-leaflet";
 import L from "leaflet";
 import type { GeoJsonObject } from "geojson";
 import type { FeatureCollection } from "geojson";
-import { getGeoJsonUrlForYear, formatYear } from "@/lib/historicalBasemaps";
+import { getGeoJsonUrlForYear } from "@/lib/historicalBasemaps";
+import { correctRegionName } from "@/lib/regionNameCorrections";
 import type { ClickedRegionInfo } from "./ClickedInfoPanel";
 import type { LegendRegion } from "@/lib/types";
 
@@ -98,7 +99,13 @@ export default function HistoricalOverlay({
       const seen = new Set<string>();
       const regions: LegendRegion[] = [];
       for (const f of fc.features ?? []) {
-        const name = (f.properties as { NAME?: string })?.NAME ?? "Unknown";
+        const rawName = (f.properties as { NAME?: string })?.NAME;
+        const geom = f.geometry;
+        const name =
+          geom && (geom.type === "MultiPolygon" || geom.type === "Polygon")
+            ? correctRegionName(rawName, displayYear, geom)
+            : (rawName ?? "Unknown");
+        // 같은 이름(예: Joseon)이면 하나만 범례에 (겹치는 영역 통합 표시)
         if (!seen.has(name)) {
           seen.add(name);
           regions.push({ name, color: getColorForName(name) });
@@ -106,7 +113,7 @@ export default function HistoricalOverlay({
       }
       onRegionsLoaded(regions);
     }
-  }, [geojson, onRegionsLoaded]);
+  }, [geojson, displayYear, onRegionsLoaded]);
 
   if (loading || error || !geojson) {
     return null;
@@ -118,8 +125,12 @@ export default function HistoricalOverlay({
         key={displayYear}
         data={geojson}
         style={(feature) => {
+          const rawName = (feature?.properties as { NAME?: string })?.NAME;
+          const geom = feature?.geometry;
           const name =
-            (feature?.properties as { NAME?: string })?.NAME ?? "Unknown";
+            geom && (geom.type === "MultiPolygon" || geom.type === "Polygon")
+              ? correctRegionName(rawName, displayYear, geom)
+              : (rawName ?? "Unknown");
           const color = getColorForName(name);
           return {
             fillColor: color,
@@ -130,8 +141,12 @@ export default function HistoricalOverlay({
         }}
         onEachFeature={(feature, layer) => {
           layer.on("click", (e) => {
+            const rawName = (feature.properties as { NAME?: string })?.NAME;
+            const geom = feature.geometry;
             const name =
-              (feature.properties as { NAME?: string })?.NAME ?? "Unknown";
+              geom && (geom.type === "MultiPolygon" || geom.type === "Polygon")
+                ? correctRegionName(rawName, displayYear, geom)
+                : (rawName ?? "Unknown");
             const latlng = e.latlng;
             setClickedPoint([latlng.lat, latlng.lng]);
             onRegionClick?.({

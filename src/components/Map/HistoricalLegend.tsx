@@ -32,6 +32,9 @@ export default function HistoricalLegend({
         <p className="mt-1 text-xs text-gray-400">외 {regions.length - 50}개</p>
       )}
       <p className="mt-3 border-t border-gray-100 pt-2 text-xs text-gray-500">
+        세계 규모용 단순화된 경계선입니다.
+      </p>
+      <p className="mt-0.5 text-xs text-gray-500">
         출처:{" "}
         <a
           href="https://github.com/aourednik/historical-basemaps"
